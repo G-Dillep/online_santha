@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Online Santha{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+        <p>Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+        <span class="badge bg-light text-success fs-6">{{ user.get_user_type_display }}</span>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4">
+        <!-- Quick Actions for Farmers -->
+        {% if user.user_type == 'farmer' %}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-seedling me-2"></i>Farmer Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'products:add' %}" class="btn btn-success">
+                                <i class="fas fa-plus me-2"></i>Add New Product
+                            </a>
+                            <a href="{% url 'products:my_products' %}" class="btn btn-outline-success">
+                                <i class="fas fa-list me-2"></i>View My Products
+                            </a>
+                            <a href="{% url 'products:list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Browse All Products
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Quick Actions for Buyers -->
+        {% if user.user_type == 'buyer' %}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-shopping-cart me-2"></i>Buyer Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'products:list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Browse Products
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-heart me-2"></i>My Wishlist
+                            </a>
+                            <a href="#" class="btn btn-outline-success">
+                                <i class="fas fa-clipboard-list me-2"></i>My Orders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Profile Section -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-user me-2"></i>Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Account Type:</strong> {{ user.get_user_type_display }}</p>
+                    <p><strong>Member Since:</strong> {{ user.date_joined|date:"M d, Y" }}</p>
+                    
+                    <div class="d-grid">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
