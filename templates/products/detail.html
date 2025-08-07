@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Online Santha{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <i class="fas fa-image text-muted" style="font-size: 5rem;"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="product-info">
+                <h2>{{ product.name }}</h2>
+                {% if product.is_organic %}
+                    <span class="badge bg-success mb-2">Organic</span>
+                {% endif %}
+                
+                <div class="price-info mb-3">
+                    <h3 class="text-success">₹{{ product.price_per_unit }}/{{ product.unit }}</h3>
+                    <p class="text-muted">Minimum order: {{ product.minimum_order }} {{ product.unit }}</p>
+                </div>
+                
+                <div class="product-details mb-4">
+                    <p><strong>Available Quantity:</strong> {{ product.quantity_available }} {{ product.unit }}</p>
+                    <p><strong>Location:</strong> {{ product.location }}</p>
+                    <p><strong>Harvest Date:</strong> {{ product.harvest_date }}</p>
+                    <p><strong>Category:</strong> {{ product.category.name }}</p>
+                </div>
+                
+                <div class="farmer-info mb-4">
+                    <h5>Farmer Information</h5>
+                    <p><strong>Name:</strong> {{ product.farmer.get_full_name|default:product.farmer.username }}</p>
+                    <p><strong>Contact:</strong> {{ product.farmer.phone_number|default:"Not provided" }}</p>
+                </div>
+                
+                {% if user.is_authenticated and user != product.farmer and user.user_type == 'buyer' %}
+                    <div class="purchase-section">
+                        <form method="post" action="{% url 'orders:add_to_cart' product.pk %}">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="quantity" class="form-label">Quantity ({{ product.unit }})</label>
+                                    <input type="number" name="quantity" id="quantity" class="form-control" 
+                                           min="{{ product.minimum_order }}" max="{{ product.quantity_available }}" 
+                                           step="0.01" value="{{ product.minimum_order }}" required>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% elif user.is_authenticated and user == product.farmer %}
+                    <div class="owner-actions">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>This is your product.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'products:edit' product.pk %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Product
+                            </a>
+                            <a href="{% url 'products:delete' product.pk %}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Product
+                            </a>
+                        </div>
+                    </div>
+                {% elif not user.is_authenticated %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        <a href="{% url 'accounts:login' %}" class="alert-link">Login</a> to purchase this product.
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Only buyers can purchase products.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4>Product Description</h4>
+            <p>{{ product.description }}</p>
+        </div>
+    </div>
+    
+    {% if related_products %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Related Products</h4>
+                <div class="row g-3">
+                    {% for related_product in related_products %}
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                {% if related_product.image %}
+                                    <img src="{{ related_product.image.url }}" class="card-img-top" 
+                                         style="height: 150px; object-fit: cover;" alt="{{ related_product.name }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ related_product.name }}</h6>
+                                    <p class="text-success">₹{{ related_product.price_per_unit }}/{{ related_product.unit }}</p>
+                                    <a href="{% url 'products:detail' related_product.pk %}" class="btn btn-sm btn-outline-primary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
